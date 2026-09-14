@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using BepInEx;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -65,11 +67,50 @@ namespace LuckyTrinket
                             $"（工作台={recipe?.Recipe?.m_craftingStation?.name ?? "null"}, " +
                             $"材料={requirements.Length} 项）。");
 
+                ExportIconForModPackaging(item.ItemDrop.m_itemData.m_shared);
+
                 _registered = true;
             }
             catch (Exception e)
             {
                 LtrLog.Error("注册幸运护符失败: ", e);
+            }
+        }
+
+        /// <summary>
+        /// 导出游戏内护符图标为 PNG（用于模组发布 icon.png）。
+        /// 输出到插件目录：LuckyTrinket/icon-export.png
+        /// </summary>
+        private static void ExportIconForModPackaging(ItemDrop.ItemData.SharedData shared)
+        {
+            try
+            {
+                var icon = shared?.m_icons != null && shared.m_icons.Length > 0
+                    ? shared.m_icons[0]
+                    : null;
+                var texture = icon != null ? icon.texture : null;
+                if (texture == null)
+                {
+                    LtrLog.Warn("护符图标导出跳过：纹理为空。");
+                    return;
+                }
+
+                byte[] png = texture.EncodeToPNG();
+                if (png == null || png.Length == 0)
+                {
+                    LtrLog.Warn("护符图标导出失败：PNG 数据为空。");
+                    return;
+                }
+
+                string dir = Path.Combine(Paths.PluginPath, LuckyTrinketPlugin.ItemPrefab);
+                Directory.CreateDirectory(dir);
+                string path = Path.Combine(dir, "icon-export.png");
+                File.WriteAllBytes(path, png);
+                LtrLog.Info($"护符图标已导出: {path}（{texture.width}x{texture.height}, {png.Length} bytes）");
+            }
+            catch (Exception e)
+            {
+                LtrLog.Warn("护符图标导出失败: " + e.Message);
             }
         }
 

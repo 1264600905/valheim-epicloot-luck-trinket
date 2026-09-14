@@ -19,7 +19,7 @@ namespace LuckyTrinket
     {
         public const string Guid = "trigger.epicloot.luckytrinket";
         public const string PluginName = "EpicLoot Lucky Trinket";
-        public const string PluginVersion = "0.2.0";
+        public const string PluginVersion = "0.2.1";
 
         /// <summary>物品 prefab 名（与注册名一致）。</summary>
         internal const string ItemPrefab = "LuckyTrinket";

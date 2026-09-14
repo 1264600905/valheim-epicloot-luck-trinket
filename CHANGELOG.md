@@ -1,5 +1,9 @@
 # 更新日志
 
+## 0.2.1
+
+- 模组图标（icon.png）更换为游戏内护符的真实物品图标。
+
 ## 0.2.0
 
 - 包名（GUID）统一为 `trigger.epicloot.luckytrinket`（旧配置自动迁移）。

@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>LuckyTrinket</AssemblyName>
     <RootNamespace>LuckyTrinket</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>..\..\BepInEx\plugins\LuckyTrinket\</OutputPath>
@@ -46,6 +46,10 @@
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>H:\SteamLibrary\steamapps\common\Valheim\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>H:\SteamLibrary\steamapps\common\Valheim\valheim_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
