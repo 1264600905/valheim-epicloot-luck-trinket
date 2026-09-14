@@ -1,0 +1,22 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+*.dll
+*.pdb
+
+# Release packages
+dist/
+
+# Local deployment helpers (machine-specific)
+deploy-when-closed.ps1
+deploy.log
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# OS
+Thumbs.db
+desktop.ini
