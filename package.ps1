@@ -30,7 +30,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $manifest = Get-Content (Join-Path $projectDir "manifest.json") -Raw | ConvertFrom-Json
 $version = $manifest.version_number
-$zipPath = Join-Path $distDir ("LuckyTrinket-{0}.zip" -f $version)
+$zipPath = Join-Path $distDir ("{0}-{1}.zip" -f $manifest.name, $version)
 
 Write-Host "==> 组装发布包 (v$version)..."
 if (Test-Path -LiteralPath $stagingDir) {

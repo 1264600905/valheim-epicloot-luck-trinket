@@ -1,7 +1,7 @@
 {
-  "name": "LuckyTrinket",
-  "version_number": "0.2.1",
-  "website_url": "https://github.com/1264600905/valheim-lucky-trinket",
+  "name": "EpicLoot_LuckTrinket",
+  "version_number": "0.2.2",
+  "website_url": "https://github.com/1264600905/valheim-epicloot-luck-trinket",
   "description": "Lucky Trinket for EpicLoot: innate +25 Luck while equipped; nearby magic drops never roll below the trinket's own rarity (equipment strictly filtered, quality materials one step below kept). Starts unenchanted - enchant to set its rarity, re-enchant to upgrade. Utility class, ExtraSlots friendly.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2350",

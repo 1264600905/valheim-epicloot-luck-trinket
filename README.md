@@ -2,6 +2,7 @@
 
 A Valheim mod that adds a **Lucky Trinket** for **EpicLoot** — a Utility-slot charm that raises the rarity floor of nearby loot.
 
+> Thunderstore package: **EpicLoot_LuckTrinket**
 > Localization: English / Simplified Chinese / Traditional Chinese
 
 ---
@@ -62,7 +63,7 @@ File: `BepInEx/config/trigger.epicloot.luckytrinket.cfg` (ConfigurationManager s
 
 ## Repository
 
-https://github.com/1264600905/valheim-lucky-trinket
+https://github.com/1264600905/valheim-epicloot-luck-trinket
 
 ## Build
 

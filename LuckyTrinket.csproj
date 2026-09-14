@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>LuckyTrinket</AssemblyName>
     <RootNamespace>LuckyTrinket</RootNamespace>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>..\..\BepInEx\plugins\LuckyTrinket\</OutputPath>

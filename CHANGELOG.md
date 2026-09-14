@@ -1,5 +1,10 @@
 # 更新日志
 
+## 0.2.2
+
+- 模组名称统一为 `EpicLoot_LuckTrinket`（体现与 EpicLoot 的强关联），游戏内显示名 "EpicLoot Luck Trinket"。
+- 仓库更名为 valheim-epicloot-luck-trinket。
+
 ## 0.2.1
 
 - 模组图标（icon.png）更换为游戏内护符的真实物品图标。
