@@ -19,6 +19,9 @@ namespace LuckyTrinket
         private static bool _resolved;
         private static MethodInfo _getEquipmentSlotsItems;
 
+        /// <summary>是否检测到可用的 ExtraSlots（API.GetEquipmentSlotsItems 可调用）。</summary>
+        internal static bool IsAvailable => Resolve();
+
         private static bool Resolve()
         {
             if (_resolved)

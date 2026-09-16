@@ -9,9 +9,10 @@ using UnityEngine;
 namespace LuckyTrinket
 {
     /// <summary>
-    /// 注册幸运护符物品：克隆原版 Trinket（饰品槽），金色染色，工作台配方合成。
-    /// 护符初始为未附魔物品，在 EpicLoot 附魔台附魔时选择品质（本 mod 会让
-    /// 已附魔的护符也能重新附魔），附魔后的品质即掉落品质下限。
+    /// 注册两枚护符物品：克隆原版 Trinket（饰品槽），工作台配方合成。
+    /// 幸运护符（金色）提供掉落品质下限；强运护符（紫色，幸运护符 + 黑金属）
+    /// 额外提供穿戴装备注入。护符初始为未附魔物品，在 EpicLoot 附魔台
+    /// 附魔时选择品质（本 mod 会让已附魔的护符也能重新附魔）。
     /// </summary>
     internal static class LuckyTrinketItems
     {
@@ -33,55 +34,77 @@ namespace LuckyTrinket
 
             try
             {
-                var requirements = new[]
-                {
-                    new RequirementConfig("Wood", 10),
-                    new RequirementConfig("BoneFragments", 10),
-                    new RequirementConfig("Coins", 50),
-                };
+                RegisterTrinket(
+                    LuckyTrinketPlugin.ItemPrefab,
+                    new Color(1f, 0.82f, 0.25f, 1f),
+                    200,
+                    LuckyTrinketLocalization.ItemName,
+                    LuckyTrinketLocalization.ItemDesc,
+                    new[]
+                    {
+                        new RequirementConfig("Wood", 10),
+                        new RequirementConfig("BoneFragments", 10),
+                        new RequirementConfig("Coins", 50),
+                    });
 
-                var config = new ItemConfig
-                {
-                    Name = LuckyTrinketPlugin.ItemPrefab,
-                    Description = LuckyTrinketPlugin.ItemPrefab,
-                    CraftingStation = "piece_workbench",
-                    MinStationLevel = 1,
-                    Amount = 1,
-                    Requirements = requirements,
-                    Weight = 1.5f,
-                };
-
-                var item = new CustomItem(LuckyTrinketPlugin.ItemPrefab, BasePrefab, config);
-
-                if (item.ItemPrefab == null)
-                {
-                    LtrLog.Error($"[{LuckyTrinketPlugin.ItemPrefab}] CustomItem 克隆 {BasePrefab} 失败。");
-                    return;
-                }
-
-                Sanitize(item);
-                ItemManager.Instance.AddItem(item);
-
-                var recipe = item.Recipe;
-                LtrLog.Info($"[{LuckyTrinketPlugin.ItemPrefab}] 物品与配方注册完成" +
-                            $"（工作台={recipe?.Recipe?.m_craftingStation?.name ?? "null"}, " +
-                            $"材料={requirements.Length} 项）。");
-
-                ExportIconForModPackaging(item.ItemDrop.m_itemData.m_shared);
+                RegisterTrinket(
+                    LuckyTrinketPlugin.GreatItemPrefab,
+                    new Color(0.85f, 0.2f, 0.85f, 1f),
+                    500,
+                    LuckyTrinketLocalization.GreatItemName,
+                    LuckyTrinketLocalization.GreatItemDesc,
+                    new[]
+                    {
+                        new RequirementConfig(LuckyTrinketPlugin.ItemPrefab, 1),
+                        new RequirementConfig("BlackMetal", 10),
+                    });
 
                 _registered = true;
             }
             catch (Exception e)
             {
-                LtrLog.Error("注册幸运护符失败: ", e);
+                LtrLog.Error("注册护符失败: ", e);
             }
+        }
+
+        /// <summary>注册单个护符：克隆基础饰品、写入本地化与属性、工作台配方。</summary>
+        private static void RegisterTrinket(string prefabName, Color tint, int value,
+            string nameToken, string descToken, RequirementConfig[] requirements)
+        {
+            var config = new ItemConfig
+            {
+                Name = prefabName,
+                Description = prefabName,
+                CraftingStation = "piece_workbench",
+                MinStationLevel = 1,
+                Amount = 1,
+                Requirements = requirements,
+                Weight = 1.5f,
+            };
+
+            var item = new CustomItem(prefabName, BasePrefab, config);
+            if (item.ItemPrefab == null)
+            {
+                LtrLog.Error($"[{prefabName}] CustomItem 克隆 {BasePrefab} 失败。");
+                return;
+            }
+
+            Sanitize(item, prefabName, tint, value, nameToken, descToken);
+            ItemManager.Instance.AddItem(item);
+
+            var recipe = item.Recipe;
+            LtrLog.Info($"[{prefabName}] 物品与配方注册完成" +
+                        $"（工作台={recipe?.Recipe?.m_craftingStation?.name ?? "null"}, " +
+                        $"材料={requirements.Length} 项）。");
+
+            ExportIconForModPackaging(item.ItemDrop.m_itemData.m_shared, prefabName);
         }
 
         /// <summary>
         /// 导出游戏内护符图标为 PNG（用于模组发布 icon.png）。
-        /// 输出到插件目录：LuckyTrinket/icon-export.png
+        /// 统一输出到插件目录 LuckyTrinket/，避免在 plugins 下多建文件夹。
         /// </summary>
-        private static void ExportIconForModPackaging(ItemDrop.ItemData.SharedData shared)
+        private static void ExportIconForModPackaging(ItemDrop.ItemData.SharedData shared, string prefabName)
         {
             try
             {
@@ -104,7 +127,10 @@ namespace LuckyTrinket
 
                 string dir = Path.Combine(Paths.PluginPath, LuckyTrinketPlugin.ItemPrefab);
                 Directory.CreateDirectory(dir);
-                string path = Path.Combine(dir, "icon-export.png");
+                string fileName = prefabName == LuckyTrinketPlugin.ItemPrefab
+                    ? "icon-export.png"
+                    : $"icon-export-{prefabName}.png";
+                string path = Path.Combine(dir, fileName);
                 File.WriteAllBytes(path, png);
                 LtrLog.Info($"护符图标已导出: {path}（{texture.width}x{texture.height}, {png.Length} bytes）");
             }
@@ -114,12 +140,13 @@ namespace LuckyTrinket
             }
         }
 
-        private static void Sanitize(CustomItem item)
+        private static void Sanitize(CustomItem item, string prefabName, Color tint, int value,
+            string nameToken, string descToken)
         {
             var drop = item.ItemDrop;
             if (drop == null)
             {
-                LtrLog.Error($"[{LuckyTrinketPlugin.ItemPrefab}] 没有 ItemDrop 组件。");
+                LtrLog.Error($"[{prefabName}] 没有 ItemDrop 组件。");
                 return;
             }
 
@@ -130,22 +157,21 @@ namespace LuckyTrinket
             shared.m_maxStackSize = 1;
             shared.m_maxQuality = 1;
             shared.m_weight = 1.5f;
-            shared.m_value = 200;
+            shared.m_value = value;
             shared.m_teleportable = true;
             shared.m_questItem = false;
 
             // 直接写入本地化 token，游戏 tooltip / 背包按当前语言解析
-            shared.m_name = LuckyTrinketLocalization.ItemName;
-            shared.m_description = LuckyTrinketLocalization.ItemDesc;
+            shared.m_name = nameToken;
+            shared.m_description = descToken;
 
             // 彻底清除从基础饰品继承的一切效果/属性，护符只保留"品质 + 固有幸运"逻辑
             StripInheritedEffects(shared, "注册");
 
-            var tint = new Color(1f, 0.82f, 0.25f, 1f);
             RecolorIcons(shared, tint);
             RecolorRenderers(item.ItemPrefab, tint);
 
-            LtrLog.Info($"[{LuckyTrinketPlugin.ItemPrefab}] 属性: type={shared.m_itemType}, " +
+            LtrLog.Info($"[{prefabName}] 属性: type={shared.m_itemType}, " +
                         $"weight={shared.m_weight}, icons={shared.m_icons?.Length ?? 0}, name={shared.m_name}");
         }
 

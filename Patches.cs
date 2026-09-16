@@ -12,13 +12,13 @@ namespace LuckyTrinket
 {
     /// <summary>
     /// Harmony 注入：
-    /// - Humanoid.EquipItem / UnequipItem：装备变化时刷新装备者 ZDO 门槛与幸运；
+    /// - Humanoid.EquipItem / UnequipItem：装备变化时刷新装备者 ZDO 门槛与穿戴名单；
     /// - LootRoller.RollLootTableInternal（两个重载）：进入掉落生成时压入
     ///   附近玩家最高门槛，结束时排除低于门槛的装备掉落；
-    /// - Multiplayer_Player_Patch...UpdateRichesAndLuck：覆盖写入含护符
-    ///   固有加成的幸运值；
-    /// - EnchantingUIController.GetEnchantableItems：让幸运护符（含已附魔的）
-    ///   始终出现在附魔列表，可附魔/重新附魔选择品质。
+    /// - LootRoller.GetLootForLevel：强运护符把穿戴装备追加进掉落池（不屏蔽原条目）；
+    /// - EnchantingUIController.GetEnchantableItems：让护符（含已附魔的）
+    ///   始终出现在附魔列表，可附魔/重新附魔选择品质；
+    /// - LootRoller.GetDropsForLevel / SelectDropType：掉落几率诊断日志。
     /// 全部动态查找 + 独立 try/catch，EpicLoot 升级导致签名变化时只禁用
     /// 对应功能，不影响物品注册。
     /// </summary>
@@ -38,17 +38,7 @@ namespace LuckyTrinket
                 null, equipPostfix, null, "Humanoid.UnequipItem");
 
             InstallLootContextPatches(harmony);
-
-            // 幸运注入顺序保证：EpicLoot 写完 el-luk 后立即覆盖为含护符加成的新值
-            var watchEffects = AccessTools.Inner(typeof(Multiplayer_Player_Patch),
-                "WatchMultiplayerMagicEffects_Player_Patch");
-            var updateRiches = watchEffects == null
-                ? null
-                : AccessTools.Method(watchEffects, "UpdateRichesAndLuck", new[] { typeof(Player) });
-
-            TryPatch(harmony, updateRiches, null,
-                HarmonyMethodFor(nameof(UpdateRichesAndLuck_Postfix)), null,
-                "Multiplayer_Player_Patch.WatchMultiplayerMagicEffects_Player_Patch.UpdateRichesAndLuck");
+            InstallDropDebugPatches(harmony);
 
             // 护符可反复附魔：EpicLoot 原生只列出未附魔物品，这里补入已附魔护符
             TryPatch(harmony,
@@ -63,7 +53,7 @@ namespace LuckyTrinket
                 null, HarmonyMethodFor(nameof(RollMagicItem_Postfix)), null,
                 "LootRoller.RollMagicItem(ItemRarity, ItemData, float, float)");
 
-            // tooltip 显示固有幸运加成
+            // tooltip 显示护符固有说明
             TryPatch(harmony,
                 AccessTools.Method(typeof(ItemDrop.ItemData), "GetTooltip",
                     new[]
@@ -96,6 +86,30 @@ namespace LuckyTrinket
                 LtrLog.Error("未注入任何 RollLootTableInternal，掉落品质下限不生效" +
                              "（EpicLoot 版本可能不兼容）。");
             }
+
+            // 强运护符：把穿戴装备追加进掉落池（LootRoller 选池入口）
+            TryPatch(harmony,
+                AccessTools.Method(typeof(LootRoller), "GetLootForLevel"),
+                null, HarmonyMethodFor(nameof(GetLootForLevel_Postfix)), null,
+                "LootRoller.GetLootForLevel");
+        }
+
+        /// <summary>
+        /// 掉落几率诊断（仅 DebugLog 打开时输出）：
+        /// - GetDropsForLevel：敌人掉落数量表（0/1/2 件几率）；
+        /// - SelectDropType：每个掉落实际选中的分类（装备/碎片石/未鉴定/材料）。
+        /// </summary>
+        private static void InstallDropDebugPatches(Harmony harmony)
+        {
+            TryPatch(harmony,
+                AccessTools.Method(typeof(LootRoller), "GetDropsForLevel"),
+                null, HarmonyMethodFor(nameof(GetDropsForLevel_Postfix)), null,
+                "LootRoller.GetDropsForLevel");
+
+            TryPatch(harmony,
+                AccessTools.Method(typeof(LootRoller), "SelectDropType"),
+                null, HarmonyMethodFor(nameof(SelectDropType_Postfix)), null,
+                "LootRoller.SelectDropType");
         }
 
         // ---------------------------------------------------------------
@@ -111,9 +125,9 @@ namespace LuckyTrinket
         }
 
         /// <summary>
-        /// 让幸运护符（含已附魔的）出现在附魔台的"附魔"列表中：
+        /// 让护符（含已附魔的）出现在附魔台的"附魔"列表中：
         /// 新护符保持未附魔，可直接附魔并选择目标品质；已附魔护符仍可
-        /// 重新附魔（重 roll 效果并提升品质），消耗按目标品质计算。
+        /// 重新附魔（重新选择品质），消耗按目标品质计算。
         /// </summary>
         private static void GetEnchantableItems_Postfix(ref List<InventoryItemListElement> __result)
         {
@@ -132,7 +146,7 @@ namespace LuckyTrinket
 
                 foreach (var item in allItems)
                 {
-                    if (!RarityFloorSystem.IsOurTrinket(item))
+                    if (!RarityFloorSystem.IsAnyTrinket(item))
                     {
                         continue;
                     }
@@ -154,65 +168,97 @@ namespace LuckyTrinket
         /// <summary>护符生成魔法数据时不带随机词条与装饰名（只保留品质）。</summary>
         private static void RollMagicItem_Postfix(ItemDrop.ItemData baseItem, ref MagicItem __result)
         {
-            if (__result != null && RarityFloorSystem.IsOurTrinket(baseItem))
+            if (__result != null && RarityFloorSystem.IsAnyTrinket(baseItem))
             {
                 RarityFloorSystem.StripTrinketFlavor(__result);
             }
         }
 
-        /// <summary>护符 tooltip 追加固有幸运加成（不占词条、不受附魔影响）。</summary>
+        /// <summary>
+        /// 护符 tooltip 追加固有说明：强运护符显示穿戴装备注入说明
+        /// （固有属性，不占词条）。
+        /// </summary>
         private static void GetTooltip_Postfix(ref string __result, ItemDrop.ItemData item, bool appending)
         {
             if (appending || item == null || string.IsNullOrEmpty(__result)
-                || !RarityFloorSystem.IsOurTrinket(item))
+                || !RarityFloorSystem.IsAnyTrinket(item))
             {
                 return;
             }
 
-            float bonus = LuckyTrinketPlugin.LuckBonus.Value;
-            if (bonus <= 0f)
+            if (RarityFloorSystem.IsGreatTrinket(item))
             {
-                return;
+                string wornText = LuckyTrinketLocalization.L(LuckyTrinketLocalization.WornPoolLine);
+                __result += "\n<color=#C77DFF>" + wornText + "</color>";
             }
-
-            string text = LuckyTrinketLocalization.L(LuckyTrinketLocalization.InnateLuck)
-                .Replace("{0}", ((int)bonus).ToString());
-            __result += "\n<color=#FFD24C>" + text + "</color>";
         }
 
         private static void RollLootTableInternal_Prefix(object[] __args)
         {
             Vector3? dropPoint = null;
+            string objectName = null;
+            int level = 0;
+            bool singleTable = false;
+
             if (__args != null)
             {
+                // 单表重载 args[0] 是 LootTable；集合重载只是逐表调用单表重载，
+                // 诊断日志只在单表重载打印，避免重复。
+                singleTable = __args.Length > 0 && __args[0] is LootTable;
+
                 foreach (var arg in __args)
                 {
                     if (arg is Vector3 point)
                     {
                         dropPoint = point;
-                        break;
+                    }
+                    else if (arg is string name)
+                    {
+                        objectName = name;
+                    }
+                    else if (arg is int lvl)
+                    {
+                        level = lvl;
                     }
                 }
             }
 
+            DropDebug.EnterContext(singleTable);
             RarityFloorSystem.EnterDropContext(dropPoint);
+
+            if (singleTable)
+            {
+                DropDebug.LogContextStart(objectName, level, dropPoint);
+            }
         }
 
         private static void RollLootTableInternal_Finalizer(ref List<GameObject> __result)
         {
-            // 先按门槛排除低品质装备，再退出上下文
+            // 先按门槛过滤（内部输出诊断），再退出上下文
             RarityFloorSystem.FilterDroppedItems(ref __result);
             RarityFloorSystem.ExitDropContext();
+            DropDebug.ExitContext();
         }
 
-        /// <summary>
-        /// 固有幸运：EpicLoot 官方写完 el-luk（基础幸运）后立即覆盖为
-        /// "基础幸运 + 护符加成"。不修改物品词条数据，因此不占效果槽，
-        /// 也不受附魔/升级操作影响；重复调用幂等，不会叠加。
-        /// </summary>
-        private static void UpdateRichesAndLuck_Postfix(Player player)
+        /// <summary>强运护符：把穿戴装备追加进本次掉落池（不屏蔽原池条目）。</summary>
+        private static void GetLootForLevel_Postfix(ref LootDrop[] __result)
         {
-            RarityFloorSystem.WriteLuckZdo(player);
+            RarityFloorSystem.InjectWornItems(ref __result);
+        }
+
+        /// <summary>敌人掉落数量表：0/1/2 件的几率。</summary>
+        private static void GetDropsForLevel_Postfix(LootTable lootTable, int level,
+            ref List<KeyValuePair<int, float>> __result)
+        {
+            DropDebug.LogCountTable(lootTable, level, __result);
+        }
+
+        /// <summary>每个掉落实际选中的分类与物品名（穿戴注入的会标注）。</summary>
+        private static void SelectDropType_Postfix(LootDrop lootDrop, bool isShardDrop,
+            ref LootDropType __result)
+        {
+            DropDebug.OnDropTypeSelected(lootDrop, isShardDrop, __result,
+                RarityFloorSystem.IsInjectedItem(lootDrop?.Item));
         }
 
         // ---------------------------------------------------------------
