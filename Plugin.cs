@@ -26,7 +26,7 @@ namespace LuckyTrinket
         /// <summary>幸运护符物品 prefab 名（与注册名一致）。</summary>
         internal const string ItemPrefab = "LuckyTrinket";
 
-        /// <summary>强运护符物品 prefab 名（幸运护符 + 10 黑金属合成）。</summary>
+        /// <summary>强运护符物品 prefab 名（幸运护符 + 10 铁锭合成）。</summary>
         internal const string GreatItemPrefab = "GreatLuckTrinket";
 
         internal static LuckyTrinketPlugin Instance;

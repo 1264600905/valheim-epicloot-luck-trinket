@@ -29,7 +29,7 @@ A Valheim mod that adds two **Utility-slot charms** for **EpicLoot**: the **Luck
 | Item | Station | Materials |
 |---|---|---|
 | Lucky Trinket | Workbench | Wood x10 + Bone Fragments x10 + Coins x50 |
-| Great Fortune Trinket | Workbench | Lucky Trinket x1 + Black Metal x10 |
+| Great Fortune Trinket | Workbench | Lucky Trinket x1 + Iron x10 |
 
 ## Usage
 
@@ -37,7 +37,7 @@ A Valheim mod that adds two **Utility-slot charms** for **EpicLoot**: the **Luck
 2. Equip it in a Utility slot (ExtraSlots adds extra slots; the vanilla Trinket slot stays free).
 3. Enchant it at the EpicLoot enchanting table and pick a target rarity (e.g. Epic / Legendary).
 4. That rarity becomes the drop floor: lower-rarity gear no longer drops near you.
-5. Want your own gear to drop too? Craft the Great Fortune Trinket (Lucky Trinket + 10 Black Metal) and equip it.
+5. Want your own gear to drop too? Craft the Great Fortune Trinket (Lucky Trinket + 10 Iron) and equip it.
 6. Want more? Re-enchant the trinket to pick a higher rarity (cost scales with the target rarity).
 
 ## Configuration
@@ -119,7 +119,7 @@ Output: `BepInEx/plugins/LuckyTrinket/LuckyTrinket.dll` (output path is preconfi
 | 物品 | 工作台 | 材料 |
 |---|---|---|
 | 幸运护符 | 工作台 | 木头×10 + 骨头碎片×10 + 金币×50 |
-| 强运护符 | 工作台 | 幸运护符×1 + 黑金属×10 |
+| 强运护符 | 工作台 | 幸运护符×1 + 铁锭×10 |
 
 ### 使用
 
@@ -127,7 +127,7 @@ Output: `BepInEx/plugins/LuckyTrinket/LuckyTrinket.dll` (output path is preconfi
 2. 装备到 Utility 槽（装 ExtraSlots 后额外槽位可用，原版「护符」槽保持空闲）。
 3. 去 EpicLoot 附魔台附魔，选择目标品质（如 Epic / Legendary）。
 4. 该品质即门槛：低于它的装备不再在附近掉落。
-5. 想让自己的装备也能掉？制作强运护符（幸运护符 + 黑金属×10）并装备。
+5. 想让自己的装备也能掉？制作强运护符（幸运护符 + 铁锭×10）并装备。
 6. 想继续提升？重新附魔选更高品质即可（消耗按目标品质计算）。
 
 ### 配置
@@ -174,7 +174,7 @@ Output: `BepInEx/plugins/LuckyTrinket/LuckyTrinket.dll` (output path is preconfi
 | 物品 | 工作台 | 材料 |
 |---|---|---|
 | 幸運護符 | 工作台 | 木頭×10 + 骨頭碎片×10 + 金幣×50 |
-| 強運護符 | 工作台 | 幸運護符×1 + 黑金屬×10 |
+| 強運護符 | 工作台 | 幸運護符×1 + 鐵錠×10 |
 
 ### 使用
 
@@ -182,7 +182,7 @@ Output: `BepInEx/plugins/LuckyTrinket/LuckyTrinket.dll` (output path is preconfi
 2. 裝備到 Utility 槽（裝 ExtraSlots 後額外槽位可用，原版「護符」槽保持空閒）。
 3. 去 EpicLoot 附魔台附魔，選擇目標品質（如 Epic / Legendary）。
 4. 該品質即門檻：低於它的裝備不再在附近掉落。
-5. 想讓自己的裝備也能掉？製作強運護符（幸運護符 + 黑金屬×10）並裝備。
+5. 想讓自己的裝備也能掉？製作強運護符（幸運護符 + 鐵錠×10）並裝備。
 6. 想繼續提升？重新附魔選更高品質即可（消耗按目標品質計算）。
 
 ### 配置

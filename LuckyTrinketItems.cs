@@ -10,7 +10,7 @@ namespace LuckyTrinket
 {
     /// <summary>
     /// 注册两枚护符物品：克隆原版 Trinket（饰品槽），工作台配方合成。
-    /// 幸运护符（金色）提供掉落品质下限；强运护符（紫色，幸运护符 + 黑金属）
+    /// 幸运护符（金色）提供掉落品质下限；强运护符（紫色，幸运护符 + 铁锭）
     /// 额外提供穿戴装备注入。护符初始为未附魔物品，在 EpicLoot 附魔台
     /// 附魔时选择品质（本 mod 会让已附魔的护符也能重新附魔）。
     /// </summary>
@@ -56,7 +56,7 @@ namespace LuckyTrinket
                     new[]
                     {
                         new RequirementConfig(LuckyTrinketPlugin.ItemPrefab, 1),
-                        new RequirementConfig("BlackMetal", 10),
+                        new RequirementConfig("Iron", 10),
                     });
 
                 _registered = true;
