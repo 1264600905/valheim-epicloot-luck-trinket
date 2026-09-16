@@ -2,7 +2,7 @@
   "name": "EpicLoot_LuckTrinket",
   "version_number": "0.3.0",
   "website_url": "https://github.com/1264600905/valheim-epicloot-luck-trinket",
-  "description": "Lucky Trinket & Great Fortune Trinket for EpicLoot: nearby drops never roll below the trinket's rarity (low-quality drops are removed, never upgraded); the Great Fortune Trinket also adds your worn equipment to nearby drop pools. Enchant to set rarity, re-enchant to upgrade. Utility class, ExtraSlots friendly.",
+  "description": "Lucky & Great Fortune Trinkets for EpicLoot: nearby drops never roll below the trinket's rarity (low-quality drops removed, never upgraded). Great Fortune adds your worn gear to nearby drop pools. Enchant to set rarity. Utility, ExtraSlots friendly.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2350",
     "ValheimModding-Jotunn-2.30.0",
